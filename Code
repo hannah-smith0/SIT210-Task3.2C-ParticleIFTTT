@@ -11,7 +11,7 @@ int lightLevelPrevious = -1;  //An int to describe the reading from the last loo
 
 int lightLevelCurrent;  //An int to describe the reading from the current loop
 
-int thresholdCrossed;   //An int to send a message to the IFTTT
+int thresholdCrossed = -1;   //An int to send a message to the IFTTT
 
 
 //Setup
@@ -51,6 +51,9 @@ void loop()
     
     //Sets the lightLevelPrevious value to the current value, ready for the next loop's comparison
     lightLevelPrevious = lightLevelCurrent;
+    
+    //sets threshold variable back to -1 to avoid refiring constantly
+    thresholdCrossed = -1
 
     
     //Waits for the set delay time
