@@ -9,7 +9,7 @@ int photoresistor = A0; // The readings from the light sensor
 
 int lightLevel;  //An int to describe the reading
 
-int sunny = 0;  //0 for false, 1 for true
+int sunny = 0;  //Starts as -1 so it doesn't trigger the IFTTT if there's no sun
 
 
 //Setup
@@ -29,7 +29,7 @@ void loop()
     
     //lightLevel = random(100,1000); //dummy value for testing purposes
     
-    String lightString = String(sunny);  //string for sending to IFTTT
+    String lightString = String(lightLevel);  //string for sending to ThingSpeak
     
     //Publishes sensor data to ThingSpeak
     Particle.publish("sunlight", lightString, PRIVATE);
@@ -38,10 +38,12 @@ void loop()
     //This stops the system from spamming. It only sends messages if there is a change in conditions
     if (sunny == 0 && lightLevel >= LIGHT_THRESHOLD)
     {
+        //This will trigger the IFTTT to fire a "sunlight detected" event
         sunny = 1;
     }
     if (sunny == 1 && lightLevel < LIGHT_THRESHOLD)
     {
+        //Fires the "dark" trigger
         sunny = 0;
     }
     
