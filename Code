@@ -7,16 +7,18 @@
 //Variables
 int photoresistor = A0; // The readings from the light sensor
 
-int lightLevel;  //An int to describe the reading
+int lightLevelPrevious = -1;  //An int to describe the reading from the last loop
 
-int sunny = 0;  //Starts as -1 so it doesn't trigger the IFTTT if there's no sun
+int lightLevelCurrent;  //An int to describe the reading from the current loop
+
+int thresholdCrossed;   //An int to send a message to the IFTTT
 
 
 //Setup
 void setup() 
 {
     //Particle variables to be read by IFTTT
-    Particle.variable("sunlightDetected", &sunny, INT);
+    Particle.variable("sunlightThreshold", &thresholdCrossed, INT);
     pinMode(photoresistor, INPUT);
 }
 
@@ -25,28 +27,30 @@ void setup()
 void loop() 
 {
     //Gathers sensor data
-    lightLevel = analogRead(photoresistor);
+    lightLevelCurrent = analogRead(photoresistor);
     
     //lightLevel = random(100,1000); //dummy value for testing purposes
     
-    String lightString = String(lightLevel);  //string for sending to ThingSpeak
+    String lightString = String(lightLevelCurrent);  //string for sending to ThingSpeak
     
     //Publishes sensor data to ThingSpeak
     Particle.publish("sunlight", lightString, PRIVATE);
     
     //Checks if the light level has gone over the threshold
     //This stops the system from spamming. It only sends messages if there is a change in conditions
-    if (sunny == 0 && lightLevel >= LIGHT_THRESHOLD)
+    if (lightLevelPrevious != -1 && lightLevelPrevious < LIGHT_THRESHOLD && lightLevelCurrent >= LIGHT_THRESHOLD)
     {
         //This will trigger the IFTTT to fire a "sunlight detected" event
-        sunny = 1;
+        thresholdCrossed = 1;
     }
-    if (sunny == 1 && lightLevel < LIGHT_THRESHOLD)
+    if (lightLevelPrevious != -1 && lightLevelPrevious >= LIGHT_THRESHOLD && lightLevelCurrent < LIGHT_THRESHOLD)
     {
-        //Fires the "dark" trigger
-        sunny = 0;
+        //Fires the "sunlight stopped" trigger
+        thresholdCrossed = 0;
     }
     
+    //Sets the lightLevelPrevious value to the current value, ready for the next loop's comparison
+    lightLevelPrevious = lightLevelCurrent;
 
     
     //Waits for the set delay time
