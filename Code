@@ -31,19 +31,18 @@ void loop()
     
     String lightString = String(sunny);  //string for sending to IFTTT
     
+    //Publishes sensor data to ThingSpeak
+    Particle.publish("sunlight", lightString, PRIVATE);
+    
     //Checks if the light level has gone over the threshold
     //This stops the system from spamming. It only sends messages if there is a change in conditions
     if (sunny == 0 && lightLevel >= LIGHT_THRESHOLD)
     {
         sunny = 1;
-        //Publishes sensor data to ThingSpeak
-        Particle.publish("sunlight", lightString, PRIVATE);
     }
     if (sunny == 1 && lightLevel < LIGHT_THRESHOLD)
     {
         sunny = 0;
-        //Publishes sensor data to ThingSpeak
-        Particle.publish("sunlight", lightString, PRIVATE);
     }
     
 
